@@ -1,0 +1,40 @@
+# @format
+
+services:
+  task-service:
+    # build:
+    #   context: ./task-service
+    #   dockerfile: Dockerfile
+    image: task_service:v1 # existing docker image
+    container_name: task-service-container-new
+    ports:
+      - 5002:5002
+    networks:
+      - todo-app-network #existing network
+    depends_on:
+      - user-service
+    environment:
+      - USER_SERVICE_URL=http://user-service:5001  # This is the URL to access the user-service  since in compose we need to pass service names (when there is a inter communication with services) because this is another environment.
+
+  user-service:
+    image: user_service:v1
+    container_name: user-service-container-new
+    ports:
+      - 5001:5001
+    networks:
+      - todo-app-network #existing network
+
+  todo-frontend:
+    image: todo_frontend_service:v1
+    container_name: frontend-service-container-new
+    ports:
+      - 3000:3000
+    networks:
+      - todo-app-network #existing network
+    depends_on:
+      - user-service
+      - task-service
+
+networks:
+  todo-app-network:
+    external: true # Use an existing network
